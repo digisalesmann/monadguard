@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'InterVariable', sans-serif; /* ✅ This is the missing line */
+
+  --background: 248 100% 99%;
+  --foreground: 248 60% 10%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 248 60% 10%;
+
+  --primary: 263 90% 58%;
+  --primary-foreground: 0 0% 100%;
+
+  --muted: 240 5% 96%;
+  --muted-foreground: 248 15% 50%;
+}
+
+
+.dark {
+  --background: 248 50% 5%;
+  --foreground: 248 20% 90%;
+
+  --card: 248 20% 10%;
+  --card-foreground: 0 0% 100%;
+
+  --primary: 263 90% 58%;
+  --primary-foreground: 0 0% 100%;
+
+  --muted: 248 20% 20%;
+  --muted-foreground: 248 15% 70%;
+}
+
+body {
+  @apply font-sans bg-background text-foreground antialiased;
+}
+
