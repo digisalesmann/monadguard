@@ -13,52 +13,48 @@ import {
 import { BarChart, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+
 interface Wallet {
   address: string
-  riskScore: number
+  sybilScore: number
   activeDapps: number
-  communityBadges: number
-  penalty?: number
-  base?: number
-  adjustedScore?: number
-  projectedTokens?: number
+  nftCount: number
+  volumeMon: number
+  predictedAirdrop: number
 }
+
+type ActivityStat = { unique_contract_calls: number }
 
 export default function AirdropSimulatorPage() {
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<Wallet[]>([])
   const [inputAddress, setInputAddress] = useState('')
 
-  const simulate = () => {
+  const simulate = async () => {
     if (!inputAddress) return
     setLoading(true)
-
-    setTimeout(() => {
-      // Simulated activity based on a hypothetical Monad dataset
-      const activeDapps = Math.floor(Math.random() * 10) + 1 // e.g., Swaps, Mints, Votes, etc.
-      const communityBadges = Math.floor(Math.random() * 5) + 1 // e.g., Testnet OG, NFT Holder, etc.
-      const base = activeDapps * 10 + communityBadges * 5
-      const riskScore = Math.floor(Math.random() * 100)
-      const penalty = riskScore > 70 ? 0.4 : 1
-      const adjustedScore = base * penalty
-      const projectedTokens = Number(
-        ((adjustedScore / 100) * 1_000_000).toFixed(0)
-      )
+    try {
+      const res = await fetch(`${API_BASE}/api/check/${inputAddress}?blocks=10`)
+      const data = await res.json()
+      const activeDapps = (Object.values(data.activity) as ActivityStat[])
+        .filter(stat => stat && stat.unique_contract_calls > 0).length
 
       const wallet: Wallet = {
         address: inputAddress,
-        riskScore,
+        sybilScore: data.sybil_score ?? 0,
         activeDapps,
-        communityBadges,
-        base,
-        penalty,
-        adjustedScore,
-        projectedTokens,
+        nftCount: data.nft_count ?? 0,
+        volumeMon: data.volume_mon ?? 0,
+        predictedAirdrop: Math.round(data.predicted_airdrop ?? 0),
       }
 
       setResults([wallet])
+    } catch {
+      alert('Simulation failed. Please check the address and backend.')
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
   }
 
   return (
@@ -69,7 +65,7 @@ export default function AirdropSimulatorPage() {
             Airdrop Allocation Simulator
           </h1>
           <p className="text-muted-foreground">
-            Enter a wallet address to simulate token rewards based on activity and risk across Monad.
+            Enter a wallet address to simulate token rewards based on real Monad testnet activity and risk.
           </p>
         </div>
 
@@ -101,7 +97,7 @@ export default function AirdropSimulatorPage() {
                       {wallet.address}
                     </CardTitle>
                     <CardDescription className="text-xs text-muted-foreground">
-                      Risk: {wallet.riskScore}% | Penalty: ×{wallet.penalty}
+                      Sybil Risk: {wallet.sybilScore}%
                     </CardDescription>
                   </div>
                   <BarChart className="w-4 h-4 text-yellow-500" />
@@ -111,14 +107,13 @@ export default function AirdropSimulatorPage() {
                     Active dApps: {wallet.activeDapps}
                   </div>
                   <div className="text-muted-foreground">
-                    Community Badges: {wallet.communityBadges}
+                    NFT Contracts: {wallet.nftCount}
                   </div>
-                  <div className="text-muted-foreground">Base Score: {wallet.base}</div>
                   <div className="text-muted-foreground">
-                    Adjusted: {wallet.adjustedScore?.toFixed(1)}
+                    Volume (MON): {wallet.volumeMon.toFixed(2)}
                   </div>
                   <div className="text-xl font-bold text-yellow-300">
-                    {wallet.projectedTokens?.toLocaleString()} tokens
+                    {wallet.predictedAirdrop.toLocaleString()} tokens
                   </div>
                 </CardContent>
               </Card>

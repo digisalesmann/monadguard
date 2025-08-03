@@ -23,9 +23,9 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   ]
 
   const socialLinks = [
-    { href: 'https://x.com', icon: FaXTwitter },
-    { href: 'https://t.me', icon: FaTelegram },
-    { href: 'https://discord.com', icon: FaDiscord },
+    { href: 'https://x.com/digisalesmann', icon: FaXTwitter },
+    { href: 'https://t.me/digisalesmann', icon: FaTelegram },
+    { href: 'https://discordapp.com/users/884179081481027585', icon: FaDiscord },
   ]
 
   return (
